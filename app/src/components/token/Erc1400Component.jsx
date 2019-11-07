@@ -2,7 +2,7 @@ import React, { Component } from "react";
 
 import { BrowserRouter as Router, NavLink, Link, Route, Switch, useParams, useRouteMatch } from "react-router-dom";
 import { Button, Form, Checkbox, Table, TableBody, TableCell, TableRow } from 'semantic-ui-react'
-import { DrizzleContext } from "@drizzle/react-plugin";
+import { deployFinished1400 } from "../../store/token/actions";
 
 import ERC1400 from "../../contracts/ERC1400.json";
 var contract = require("@truffle/contract");
@@ -35,7 +35,7 @@ export default class Erc1400Component extends Component {
       this.utils.toBN(this.formData.decimals),
       this.formData.controllers,
       this.props.drizzle.contracts.ComplianceServiceRegistry.address, { from: this.props.drizzleState.accounts[0] }).then(inst => {
-        this.deployedTokens.push({
+      let payload = {
           name: this.formData.name,
           symbol: this.formData.symbol,
           decimals: this.utils.toBN(this.formData.decimals),
@@ -43,8 +43,10 @@ export default class Erc1400Component extends Component {
           registryAddress: this.props.drizzle.contracts.ComplianceServiceRegistry.address,
           contractAddress: inst.address,
           deployAccount: this.props.drizzleState.accounts[0]
-        });
+        };
+        this.props.drizzle.store.dispatch(deployFinished1400(payload))
       })
+
     return;
   }
 
@@ -85,7 +87,7 @@ export default class Erc1400Component extends Component {
           </Table.Header>
 
           <Table.Body>
-            {this.deployedTokens.map(el =>
+            {this.props.drizzleState.deployedTokens.map(el =>
               <Table.Row>
                 <Table.Cell>{el.name}</Table.Cell>
                 <Table.Cell>{el.symbol}</Table.Cell>
