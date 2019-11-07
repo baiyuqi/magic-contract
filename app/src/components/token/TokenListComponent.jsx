@@ -12,10 +12,8 @@ export default class TokenListComponent extends Component {
   handleInputChange(event) {
 
     const value =
-      event.target.type === "checkbox"
-        ? event.target.checked
-        : event.target.value;
-    this.formData[event.target.name] = value;
+      event.target.key;
+      this.props.select(value) 
 
   }
  
@@ -38,8 +36,12 @@ export default class TokenListComponent extends Component {
           </Table.Header>
 
           <Table.Body>
-            {this.props.drizzleState.deployedTokens.map(el =>
-              <Table.Row>
+            {this.props.drizzleState.deployedTokens.map(el =>{
+                    const select = ()=>{
+                        if(this.props.select!=undefined)
+                            this.props.select(el.contractAddress) 
+                    }
+             return  (<Table.Row  onClick={select}>
                 <Table.Cell>{el.name}</Table.Cell>
                 <Table.Cell>{el.symbol}</Table.Cell>
                 <Table.Cell>{el.decimals.toString()}</Table.Cell>
@@ -47,8 +49,8 @@ export default class TokenListComponent extends Component {
                 <Table.Cell>{el.registryAddress}</Table.Cell>
                 <Table.Cell>{el.contractAddress}</Table.Cell>
                 <Table.Cell>{el.deployAccount.toString()}</Table.Cell>
-              </Table.Row>
-            )}
+              </Table.Row>)
+            })}
           </Table.Body>
         </Table>
 

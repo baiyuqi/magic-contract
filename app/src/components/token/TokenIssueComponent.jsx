@@ -5,17 +5,13 @@ import { Button, Form, Checkbox, Table, TableBody, TableCell, TableRow } from 's
 import { deployFinished1400 } from "../../store/token/actions";
 
 import ERC1400 from "../../contracts/ERC1400.json";
+import TokenListComponent from "./TokenListComponent";
 var contract = require("@truffle/contract");
 
-export default class Erc1400Component extends Component {
+export default class TokenIssueComponent extends Component {
   constructor(props) {
     super(props);
-
-    var MyContract = contract(ERC1400)
-    this.utils = props.drizzle.web3.utils;
-    this.MyContract = MyContract;
     this.formData = { controllers: [] };
-    this.deployedTokens = [];
 
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -23,29 +19,23 @@ export default class Erc1400Component extends Component {
     this.handleAddController = this.handleAddController.bind(this);
   }
   //https://github.com/trufflesuite/truffle/tree/master/packages/contract
-  handleSubmit(event) {
+  async handleSubmit(event) {
     event.preventDefault();
-    let web3 = this.props.drizzle.web3;
-    this.MyContract.setProvider(web3.currentProvider);
+//function issueByPartition(bytes32 _partition, address _tokenHolder, uint256 _value, bytes calldata _data) external; //ok
 
-
-    this.MyContract.new(
-      this.formData.name,
-      this.formData.symbol,
-      this.utils.toBN(this.formData.decimals),
-      this.formData.controllers,
-      this.props.drizzle.contracts.ComplianceServiceRegistry.address, { from: this.props.drizzleState.accounts[0] }).then(inst => {
-      let payload = {
-          name: this.formData.name,
-          symbol: this.formData.symbol,
-          decimals: this.utils.toBN(this.formData.decimals),
-          controllers: this.formData.controllers.slice(0),
-          registryAddress: this.props.drizzle.contracts.ComplianceServiceRegistry.address,
-          contractAddress: inst.address,
-          deployAccount: this.props.drizzleState.accounts[0]
-        };
-        this.props.drizzle.store.dispatch(deployFinished1400(payload))
-      })
+    
+    let MyContract = contract(ERC1400)
+   
+  
+    const web3 = this.props.drizzle.web3;
+    const utils = web3.utils;
+    MyContract.setProvider(web3.currentProvider);
+    let inst = await MyContract.at(this.tokenAddress)
+    await inst.issueByPartition(
+      this.formData.partition,
+      this.formData.holderAddress,
+      this.formData.amount,
+      { from: this.props.drizzleState.accounts[0] });
 
     return;
   }
@@ -62,77 +52,33 @@ export default class Erc1400Component extends Component {
   handleAddController(event) {
     const value = this.formData.controllers.push(this.formData.controller)
   }
-  // string memory name,
-  // string memory symbol,
-  // uint256 decimals,
-  // address[] memory controllers,
-  // address  ConfigurableComplianceServiceaddr
+   select = (addr)=>{
+      this.tokenAddress = addr
+  }
   render() {
 
     return (
       <div>
       
-        <Table fixed>
-          <Table.Header>
-            <Table.Row>
-              <Table.HeaderCell>name</Table.HeaderCell>
-              <Table.HeaderCell>symbol</Table.HeaderCell>
-              <Table.HeaderCell>decimal</Table.HeaderCell>
-              <Table.HeaderCell>controllers</Table.HeaderCell>
-              <Table.HeaderCell>registryService</Table.HeaderCell>
-              <Table.HeaderCell>contractAddess</Table.HeaderCell>
-              <Table.HeaderCell>deployAccount</Table.HeaderCell>
-            </Table.Row>
-          </Table.Header>
-
-          <Table.Body>
-            {this.props.drizzleState.deployedTokens.map(el =>
-              <Table.Row>
-                <Table.Cell>{el.name}</Table.Cell>
-                <Table.Cell>{el.symbol}</Table.Cell>
-                <Table.Cell>{el.decimals.toString()}</Table.Cell>
-                <Table.Cell>{el.controllers.toString()}</Table.Cell>
-                <Table.Cell>{el.registryAddress}</Table.Cell>
-                <Table.Cell>{el.contractAddress}</Table.Cell>
-                <Table.Cell>{el.deployAccount.toString()}</Table.Cell>
-              </Table.Row>
-            )}
-          </Table.Body>
-        </Table>
+       <TokenListComponent {...this.props} select={this.select}></TokenListComponent>
 
         <div
           onChange={this.handleInputChange}
         >
           <Form.Field>
-            <label>Token Name</label>
-            <input placeholder='name' name="name" />
+            <label>partition</label>
+            <input placeholder='partition' name="partition" />
           </Form.Field>
           <Form.Field>
-            <label>Tonen Symbol</label>
-            <input placeholder='symbol' name="symbol" />
+            <label>token holder address</label>
+            <input placeholder='issueing to address' name="tokenHolder" />
           </Form.Field>
           <Form.Field>
-            <label>decimals</label>
-            <input placeholder='decimals' type="" name="decimals" />
+            <label>amount</label>
+            <input placeholder='decimals' type="" name="amount" />
           </Form.Field>
-          <Form.Field>
-            <label>Address of Compliance Service Registry</label>
-            <input type="address" placeholder='CompolianceServiceRegistry' name="registryAddress" disabled value={this.props.drizzle.contracts.ComplianceServiceRegistry.address} ></input>
-          </Form.Field>
+         
 
-
-          <div role="list" class="ui list">
-            {this.formData.controllers.map(el => <div role="listitem" class="item">{el}</div>)}
-
-          </div>
-          <Form.Field>
-            <label>controller</label>
-            <input placeholder='controller' name="controller" />
-          </Form.Field>
-          <Button onClick={this.handleAddController}>add controller</Button>
-          <Form.Field>
-            <Checkbox label='I agree to the Terms and Conditions' />
-          </Form.Field>
 
           <Button onClick={this.handleSubmit}>Submit</Button>
         </div>
