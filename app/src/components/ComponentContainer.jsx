@@ -36,7 +36,7 @@ export default function ComponentContainer() {
             </Route>
           </Switch>
         </div>
-        <div className="second"></div>
+       
       </div>
     </Router>
   );
