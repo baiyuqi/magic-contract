@@ -31,11 +31,13 @@ export default class TokenIssueComponent extends Component {
     const utils = web3.utils;
     MyContract.setProvider(web3.currentProvider);
     let inst = await MyContract.at(this.tokenAddress)
+    alert(inst.address)
     await inst.issueByPartition(
       this.formData.partition,
       this.formData.holderAddress,
       this.formData.amount,
-      { from: this.props.drizzleState.accounts[0] });
+       "0x0000",
+       { from: this.props.drizzleState.accounts[0] });
 
     return;
   }
@@ -71,7 +73,7 @@ export default class TokenIssueComponent extends Component {
           </Form.Field>
           <Form.Field>
             <label>token holder address</label>
-            <input placeholder='issueing to address' name="tokenHolder" />
+            <input placeholder='issueing to address' name="holderAddress" />
           </Form.Field>
           <Form.Field>
             <label>amount</label>
