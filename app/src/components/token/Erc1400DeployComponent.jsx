@@ -27,6 +27,18 @@ export default class Erc1400Component extends Component {
     event.preventDefault();
     let web3 = this.props.drizzle.web3;
     this.MyContract.setProvider(web3.currentProvider);
+    if(this.formData.name == undefined ||this.formData.symbol == undefined ||this.formData.decimals == undefined){
+      alert("select token please!")
+      return
+    }
+    if(this.formData.name.length == 0 ||this.formData.symbol.length == 0 ||this.formData.decimals.length == 0){
+      alert("select token please!")
+      return
+    }
+    // if(!this.utils.isBN( this.formData.decimals)){
+    //   alert("select decimals!")
+    //   return
+    // }
 
 
     this.MyContract.new(

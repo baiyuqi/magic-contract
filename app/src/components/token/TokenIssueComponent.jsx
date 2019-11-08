@@ -29,9 +29,23 @@ export default class TokenIssueComponent extends Component {
   
     const web3 = this.props.drizzle.web3;
     const utils = web3.utils;
+    if(!utils.isAddress( this.tokenAddress)){
+      alert("select token please!")
+      return
+    }
+
+    if(!utils.isAddress( this.formData.holderAddress)){
+      alert("select token holder please!")
+      return
+    }
+ 
+    if(!utils.isHex( this.formData.partition)){
+      alert("input correct partition please!")
+      return
+    }
     MyContract.setProvider(web3.currentProvider);
     let inst = await MyContract.at(this.tokenAddress)
-    alert(inst.address)
+
     await inst.issueByPartition(
       this.formData.partition,
       this.formData.holderAddress,
